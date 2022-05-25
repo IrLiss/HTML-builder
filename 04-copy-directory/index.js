@@ -7,12 +7,31 @@ let dirCurrent = path.join(filename);
 let dirCopy = path.join(filenameCopy);
 
 function createDir(dirCopy) {
+
+    fs.access(dirCopy, (error) => {
+        if (error && error.code === 'ENOENT') {
             fs.mkdir(dirCopy, {recursive: true}, (error) => {
                 if (error) {
                     return console.log(error.message);
                 }
             });
-            copyDir(dirCurrent, dirCopy);
+            copyDir(dirCurrent, dirCopy)
+        } else {
+            fs.readdir(dirCopy, (error, fileNames) => {
+                if (error) {
+                    return console.log(error.message);
+                }
+                fileNames.forEach(filename => {
+                    fs.unlink(path.join(dirCopy, filename), (error) => {
+                        if (error) {
+                            return console.log(error.message);
+                        }
+                    })
+                })
+            })
+            copyDir(dirCurrent, dirCopy)
+        }
+    });
 }
 
 function copyDir(dirCurrent, dirCopy) {
